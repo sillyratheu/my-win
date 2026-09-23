@@ -48,10 +48,12 @@ jobs:
             }
             if ($line) {
                 Write-Host $line
-                if ($line -match "serveo\.net") {
-                    $matched = [regex]::Match($line, 'serveo\.net:\d+')
+                if ($line -match "Forwarding TCP connections from") {
+                    $matched = [regex]::Match($line, '([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\s+(\d+)')
                     if ($matched.Success) {
-                        $url = $matched.Value
+                        $hostPart = $matched.Groups[1].Value
+                        $portPart = $matched.Groups[2].Value
+                        $url = "$hostPart:$portPart"
                         Write-Host "Generated URL: $url"
                         Set-Content -Path "rdp-url.txt" -Value $url
                         
