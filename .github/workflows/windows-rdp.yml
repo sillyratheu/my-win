@@ -23,9 +23,7 @@ jobs:
 
     - name: Set Administrator Password
       run: |
-        net user runneradmin 12345678 /add || true
-        net localgroup administrators runneradmin /add || true
-        net user runneradmin 12345678
+        net user runneradmin RdpPassword123!
 
     - name: Start Pinggy & Auto-Update Website URL
       shell: pwsh
