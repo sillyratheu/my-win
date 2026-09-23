@@ -25,17 +25,16 @@ jobs:
       run: |
         net user runneradmin RdpPassword123!
 
-    - name: Start Pinggy & Auto-Update Website URL
+    - name: Start Serveo Tunnel & Auto-Update Website URL
       shell: pwsh
       run: |
-        Write-Host "Starting Pinggy Tunnel..."
+        Write-Host "Starting Serveo Tunnel..."
         git config --global user.name "RDP Bot"
         git config --global user.email "bot@github.com"
 
         $processInfo = New-Object System.Diagnostics.ProcessStartInfo
         $processInfo.FileName = "ssh"
-        # -n flag added here to prevent hanging on stdin
-        $processInfo.Arguments = "-n -T -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -p 443 -R 0:localhost:3389 tcp@a.pinggy.io"
+        $processInfo.Arguments = "-n -T -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -R 0:localhost:3389 serveo.net"
         $processInfo.RedirectStandardOutput = $true
         $processInfo.RedirectStandardError = $true
         $processInfo.UseShellExecute = $false
@@ -49,8 +48,8 @@ jobs:
             }
             if ($line) {
                 Write-Host $line
-                if ($line -match "tcp://") {
-                    $matched = [regex]::Match($line, 'tcp://[^\s]*')
+                if ($line -match "serveo\.net") {
+                    $matched = [regex]::Match($line, 'serveo\.net:\d+')
                     if ($matched.Success) {
                         $url = $matched.Value
                         Write-Host "Generated URL: $url"
