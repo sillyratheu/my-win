@@ -34,7 +34,8 @@ jobs:
 
         $processInfo = New-Object System.Diagnostics.ProcessStartInfo
         $processInfo.FileName = "ssh"
-        $processInfo.Arguments = "-T -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -p 443 -R 0:localhost:3389 tcp@a.pinggy.io"
+        # -n flag added here to prevent hanging on stdin
+        $processInfo.Arguments = "-n -T -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -p 443 -R 0:localhost:3389 tcp@a.pinggy.io"
         $processInfo.RedirectStandardOutput = $true
         $processInfo.RedirectStandardError = $true
         $processInfo.UseShellExecute = $false
