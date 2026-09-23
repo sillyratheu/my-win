@@ -1,0 +1,52 @@
+name: Windows True RDP
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rdp:
+    runs-on: windows-latest
+    timeout-minutes: 350
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Enable Windows RDP
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+
+    - name: Set Administrator Password
+      run: |
+        net user runneradmin 12345678 /add || true
+        net localgroup administrators runneradmin /add || true
+        net user runneradmin 12345678
+
+    - name: Start Pinggy & Auto-Update Website URL
+      shell: pwsh
+      run: |
+        Write-Host "Starting Pinggy Tunnel..."
+        git config --global user.name "RDP Bot"
+        git config --global user.email "bot@github.com"
+
+        ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -p 443 -R 0:localhost:3389 tcp@a.pinggy.io 2>&1 | ForEach-Object {
+            Write-Host $_
+            if ($_ -match "tcp://") {
+                $matched = [regex]::Match($_, 'tcp://[^\s]*')
+                if ($matched.Success) {
+                    $url = $matched.Value
+                    Write-Host "Generated URL: $url"
+                    Set-Content -Path "rdp-url.txt" -Value $url
+                    
+                    git add rdp-url.txt
+                    git commit -m "Auto update Windows RDP URL [skip ci]" --allow-empty
+                    git push
+                }
+            }
+        }
+        
